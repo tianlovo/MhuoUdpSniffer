@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- scan:当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true。
+     scanPeriod:设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。默认的时间间隔为1分钟。
+     debug:当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。 -->
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+    <!-- 存放日志文件的目录(该示例表示在jar包同级目录的文件夹logs下存放) -->
+    <property name="LOG_DIR" value="logs" />
+
+    <!-- 输出控制，格式控制 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %date{HH:mm:ss} [%-5level] [%thread] %logger{17} - %m%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- 日志文件保存配置 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 日志文件名称 -->
+        <file>${LOG_DIR}/log_file.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 每天产生一个新的日志文件 -->
+            <fileNamePattern>${LOG_DIR}/log_file.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- 保留15天的日志 -->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>
+                %date{HH:mm:ss} [%-5level] [%thread] %logger{17} - %m%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- 用来控制查看哪个类的日志内容 -->
+    <logger name="com.tlovo" level="DEBUG" additivity="false">
+        <!-- 表示该包下所有类的日志信息全写入文件 -->
+        <appender-ref ref="FILE" />
+        <!-- 表示该包下所有类的日志信息全写入控制台 -->
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+    <!-- Netty的LoggingHandler控制台日志输出 -->
+    <logger name="io.netty.handler.logging.LoggingHandler" level="DEBUG" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <root level="ERROR">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
