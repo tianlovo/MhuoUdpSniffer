@@ -1,5 +1,7 @@
 package com.tlovo.util;
 
+import io.netty.buffer.ByteBuf;
+
 /**
  * 字节工具类
  */
@@ -45,5 +47,25 @@ public final class BytesUtil {
         }
 
         return hexString.toString();
+    }
+
+    /**
+     * Int32转无符号Int32
+     * @param value Int32
+     * @return 无符号Int32
+     */
+    public static long int2UnsignedInt(int value) {
+        return value & 0xFFFFFFFFL;
+    }
+
+    /**
+     * Netty的直接内存转为字节数组
+     * @param buffer 直接内存
+     * @return 字节数组
+     */
+    public static byte[] directBufferToByteArray(ByteBuf buffer) {
+        byte[] bytes = new byte[buffer.readableBytes()];
+        buffer.readBytes(bytes);
+        return bytes;
     }
 }

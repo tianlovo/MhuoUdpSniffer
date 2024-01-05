@@ -19,6 +19,12 @@ public class LoggingConfig extends Config {
     @JSONField(name = "enable_captured_hint")
     public boolean EnableCapturedHint = false;
 
+    /**
+     * 是否打印Kcp解析信息
+     */
+    @JSONField(name = "enable_kcp_analyze_hint")
+    public boolean EnableKcpAnalyzeHint = true;
+
     @Getter
     @Setter(AccessLevel.PROTECTED)
     private transient File file;
