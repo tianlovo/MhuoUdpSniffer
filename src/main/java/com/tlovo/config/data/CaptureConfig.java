@@ -9,6 +9,8 @@ import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 捕获配置数据类
@@ -41,6 +43,14 @@ public class CaptureConfig extends Config {
     public PromiscuousMode CaptureMode = PromiscuousMode.NONPROMISCUOUS; // 非混杂模式，仅捕获指定设备的流量
 
     /**
+     * 捕获服务器端口列表（包括源和目标端口）
+     * <br/>
+     * -1为捕获所有端口
+     */
+    @JSONField(name = "server_port_list")
+    public List<Short> ServerPortList = new ArrayList<>(List.of((short) 23301, (short) 23302));
+
+    /**
      * 是否启用Kcp分析服务
      */
     @JSONField(name = "enable_kcp_analyze")
@@ -65,6 +75,7 @@ public class CaptureConfig extends Config {
                 Timeout = config.Timeout;
                 CaptureMode = config.CaptureMode;
                 EnableKcpAnalyze = config.EnableKcpAnalyze;
+                ServerPortList = config.ServerPortList;
             } catch (IOException e) {
                 log.warn("读取文件发生错误", e);
                 return false;

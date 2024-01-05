@@ -3,5 +3,9 @@
 	"capture_mode": "NONPROMISCUOUS",
 	"enable_kcp_analyze": false,
 	"per_max_length": 1048576,
-	"timeout": 10000
+	"server_port_list":[
+		23301,
+		23302
+	],
+	"timeout":10000
 }
