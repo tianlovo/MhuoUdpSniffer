@@ -1,0 +1,7 @@
+{
+	"bind_device_mac": "50-EB-F6-4A-39-7E",
+	"capture_mode": "NONPROMISCUOUS",
+	"enable_kcp_analyze": false,
+	"per_max_length": 1048576,
+	"timeout": 10000
+}
