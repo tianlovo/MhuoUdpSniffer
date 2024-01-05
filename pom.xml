@@ -27,13 +27,12 @@
             <version>1.8.2</version>
         </dependency>
 
-        <!-- KCP -->
+        <!-- PROTOBUF -->
+        <!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
         <dependency>
-            <groupId>com.lamx.disruptor</groupId>
-            <artifactId>kcp</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/libs/kcp.jar</systemPath>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.25.0</version>
         </dependency>
 
         <!-- NETTY -->
@@ -116,8 +115,7 @@
                         <!-- 第三方jar添加到MANIFEST.MF -->
                         <manifestEntries>
                             <!-- 第三方jar在最终依赖位置的名称 -->
-                            <Class-Path>libs/kcp-1.0.0.jar</Class-Path>
-                            <Class-Path>libs/jnetpcap-2.0.0.jar</Class-Path>
+<!--                            <Class-Path>libs/xxx.jar</Class-Path>-->
                         </manifestEntries>
                     </archive>
                 </configuration>

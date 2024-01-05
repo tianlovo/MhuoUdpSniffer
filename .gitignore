@@ -39,3 +39,4 @@ build/
 
 ## Custom ###
 /logs/
+/src/main/java/com/tlovo/proto/*

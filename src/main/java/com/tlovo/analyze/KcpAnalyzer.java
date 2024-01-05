@@ -1,17 +1,24 @@
 package com.tlovo.analyze;
 
+import com.alibaba.fastjson2.JSON;
+import com.google.protobuf.*;
 import com.tlovo.MhuoUdpSniffer;
 import com.tlovo.analyze.packet.PacketConst;
+import com.tlovo.analyze.packet.ProtoField;
+import com.tlovo.analyze.packet.ProtoMessage;
 import com.tlovo.config.data.CaptureConfig;
 import com.tlovo.config.data.KcpAnalyzeConfig;
 import com.tlovo.config.data.LoggingConfig;
+import com.tlovo.proto.EmptyMessageOuterClass.EmptyMessage;
 import com.tlovo.util.BytesUtil;
 import com.tlovo.util.CryptoHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.FileDescriptor;
 import java.util.Base64;
+import java.util.List;
 
 /**
  * Kcp数据分析器
@@ -44,7 +51,9 @@ public class KcpAnalyzer implements Runnable {
         if (kcpBuf != null) {
             byte[] proto = parseKcpPacket(kcpBuf);
             kcpBuf.release();
-            // TODO 处理proto
+
+            ProtoMessage msg = parseUnknownProto(proto);
+            // TODO 处理消息
         }
     }
 
@@ -114,5 +123,25 @@ public class KcpAnalyzer implements Runnable {
         }
 
         return proto;
+    }
+
+    /**
+     * 解析未知Protobuf消息
+     * @param proto Protobuf消息字节
+     * @return Protobuf消息数据类
+     */
+    public ProtoMessage parseUnknownProto(byte[] proto) {
+        try {
+            EmptyMessage msg = EmptyMessage.parseFrom(proto);
+
+            ProtoMessage message = new ProtoMessage();
+            message.parseFrom(msg.getUnknownFields());
+
+            return message;
+        } catch (InvalidProtocolBufferException e) {
+            log.warn("无效的Protobuf字节", e);
+        }
+
+        return null;
     }
 }
