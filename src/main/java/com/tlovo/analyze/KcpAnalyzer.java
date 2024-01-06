@@ -74,6 +74,7 @@ public class KcpAnalyzer implements Runnable {
         if (keyBase64 == null || keyBase64.isBlank()) {
             if (loggingConfig.EnableKcpAnalyzeHint) {
                 log.warn("无效Xor魔数键 => " + xorMagic);
+                // TODO PlayerGetTokenSc
 //                log.debug(BytesUtil.byteArrayToHexString(udpRawData, 16));
             }
             return null;
