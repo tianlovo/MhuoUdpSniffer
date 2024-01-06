@@ -3,6 +3,7 @@ package com.tlovo.analyze.packet;
 /**
  * 数据包指令值定义类
  */
+@SuppressWarnings("unused")
 public final class CmdId {
     // Empty
     public static final int NONE = 0;

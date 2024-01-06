@@ -4,12 +4,14 @@ import com.tlovo.MhuoUdpSniffer;
 import com.tlovo.analyze.KcpAnalyzer;
 import com.tlovo.config.data.CaptureConfig;
 import com.tlovo.config.data.LoggingConfig;
+import com.tlovo.pcap.data.CaptureData;
 import lombok.extern.slf4j.Slf4j;
 import org.pcap4j.core.PacketListener;
 import org.pcap4j.packet.Packet;
 import org.pcap4j.packet.UdpPacket;
 import org.pcap4j.packet.UdpPacket.UdpHeader;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -20,10 +22,12 @@ import java.util.concurrent.ExecutorService;
 public class UdpPacketListener implements PacketListener {
     /** 解析数据包线程池 */
     private final ExecutorService packetParsePool;
-
+    private final CaptureSaver captureSaver;
 
     public UdpPacketListener(ExecutorService packetParsePool) {
         this.packetParsePool = packetParsePool;
+        this.captureSaver = new CaptureSaver(MhuoUdpSniffer.getCaptureConfig().SaveCaptureInterval);
+        captureSaver.start();
     }
 
     /**
@@ -55,18 +59,32 @@ public class UdpPacketListener implements PacketListener {
             }
 
             // 处理数据包
-            handlePacket(udpPacket.getRawData(), sender);
+            handlePacket(udpPacket, sender);
         }
     }
 
-    private void handlePacket(byte[] rawData, String sender) {
+    private void handlePacket(UdpPacket packet, String sender) {
         if (sender.isBlank()) return;
+        byte[] rawData = packet.getRawData();
 
         CaptureConfig captureConfig = MhuoUdpSniffer.getCaptureConfig();
         LoggingConfig loggingConfig = MhuoUdpSniffer.getLoggingConfig();
 
         if (loggingConfig.EnableCapturedHint) {
             log.info("捕获UDP => " + rawData.length + "字节");
+        }
+
+        // 保存捕获数据
+        if (captureConfig.AutoSaveCapture) {
+            packetParsePool.submit(() -> {
+                UdpHeader header = packet.getHeader();
+                captureSaver.add2Save(new CaptureData(
+                        header.getSrcPort().value(),
+                        header.getDstPort().value(),
+                        System.currentTimeMillis(),
+                        Base64.getEncoder().encodeToString(rawData)
+                ));
+            });
         }
 
         // 分析KCP数据
@@ -79,6 +97,10 @@ public class UdpPacketListener implements PacketListener {
      * 监听器关闭事件
      */
     public void onShutdown() {
+        if (captureSaver != null) {
+            captureSaver.stop();
+        }
+
         if (packetParsePool != null) {
             packetParsePool.shutdown();
         }

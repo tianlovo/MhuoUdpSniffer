@@ -2,6 +2,7 @@ package com.tlovo.config.data;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.tlovo.util.PathUtil;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode;
@@ -56,6 +57,18 @@ public class CaptureConfig extends Config {
     @JSONField(name = "enable_kcp_analyze")
     public boolean EnableKcpAnalyze = false;
 
+    /**
+     * 是否保存捕获数据
+     */
+    @JSONField(name = "auto_save_capture")
+    public boolean AutoSaveCapture = true;
+
+    /**
+     * 保存捕获数据间隔（秒）
+     */
+    @JSONField(name = "save_capture_interval")
+    public int SaveCaptureInterval = 1;
+
     @Getter
     @Setter(AccessLevel.PROTECTED)
     private transient File file;
@@ -76,6 +89,8 @@ public class CaptureConfig extends Config {
                 CaptureMode = config.CaptureMode;
                 EnableKcpAnalyze = config.EnableKcpAnalyze;
                 ServerPortList = config.ServerPortList;
+                AutoSaveCapture = config.AutoSaveCapture;
+                SaveCaptureInterval = config.SaveCaptureInterval;
             } catch (IOException e) {
                 log.warn("读取文件发生错误", e);
                 return false;

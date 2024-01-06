@@ -7,4 +7,5 @@ public final class PathUtil {
     public static String JarPath = System.getProperty("user.dir");
     public static String DataPath = JarPath + "/data";
     public static String ConfigPath = DataPath + "/config";
+    public static String CapturePath = DataPath + "/capture";
 }
