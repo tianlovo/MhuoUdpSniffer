@@ -2,11 +2,9 @@ package com.tlovo.pcap;
 
 import com.tlovo.MhuoUdpSniffer;
 import com.tlovo.config.data.CaptureConfig;
+import com.tlovo.util.PathUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.pcap4j.core.NotOpenException;
-import org.pcap4j.core.PcapHandle;
-import org.pcap4j.core.PcapNativeException;
-import org.pcap4j.core.PcapNetworkInterface;
+import org.pcap4j.core.*;
 
 import java.util.concurrent.Executors;
 
@@ -41,7 +39,16 @@ public class UdpCapture extends Thread {
             try (PcapHandle pcap = networkInterface.openLive(
                     captureConfig.PerMaxLength,
                     captureConfig.CaptureMode,
-                    captureConfig.Timeout)) {
+                    captureConfig.Timeout
+            )) {
+
+                // 创建.pcap文件继续捕获数据保存
+                if (captureConfig.AutoSaveCapture){
+                    PcapDumper dumper = pcap.dumpOpen(PathUtil.CapturePath +
+                            "/pcap/capture_" + System.currentTimeMillis() + ".pcap");
+                    udpPacketListener.setDumper(dumper);
+                }
+
                 pcap.loop(-1, udpPacketListener);
             }
         } catch (PcapNativeException | InterruptedException | NotOpenException e) {

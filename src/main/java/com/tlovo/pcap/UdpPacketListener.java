@@ -6,7 +6,9 @@ import com.tlovo.config.data.CaptureConfig;
 import com.tlovo.config.data.LoggingConfig;
 import com.tlovo.pcap.data.CaptureData;
 import lombok.extern.slf4j.Slf4j;
+import org.pcap4j.core.NotOpenException;
 import org.pcap4j.core.PacketListener;
+import org.pcap4j.core.PcapDumper;
 import org.pcap4j.packet.Packet;
 import org.pcap4j.packet.UdpPacket;
 import org.pcap4j.packet.UdpPacket.UdpHeader;
@@ -23,11 +25,20 @@ public class UdpPacketListener implements PacketListener {
     /** 解析数据包线程池 */
     private final ExecutorService packetParsePool;
     private final CaptureSaver captureSaver;
+    private PcapDumper dumper;
 
     public UdpPacketListener(ExecutorService packetParsePool) {
         this.packetParsePool = packetParsePool;
         this.captureSaver = new CaptureSaver(MhuoUdpSniffer.getCaptureConfig().SaveCaptureInterval);
         captureSaver.start();
+    }
+
+    /**
+     * 设置.pcap文件保存器
+     * @param dumper .pcap文件保存器
+     */
+    public void setDumper(PcapDumper dumper) {
+        this.dumper = dumper;
     }
 
     /**
@@ -77,6 +88,15 @@ public class UdpPacketListener implements PacketListener {
         // 保存捕获数据
         if (captureConfig.AutoSaveCapture) {
             packetParsePool.submit(() -> {
+                // 保存到.pcap文件
+                if (dumper != null) {
+                    try {
+                        dumper.dump(packet);
+                    } catch (NotOpenException e) {
+                        log.warn("捕获数据保存到.pcap文件发生异常", e);
+                    }
+                }
+
                 UdpHeader header = packet.getHeader();
                 captureSaver.add2Save(new CaptureData(
                         header.getSrcPort().value(),

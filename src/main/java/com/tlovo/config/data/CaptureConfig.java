@@ -2,8 +2,10 @@ package com.tlovo.config.data;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.tlovo.util.PathUtil;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode;
 
