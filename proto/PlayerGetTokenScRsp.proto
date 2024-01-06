@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "com.tlovo.proto";
+
+import "BlackInfo.proto";
+
+message PlayerGetTokenScRsp {
+    uint64 secret_key_seed = 11;
+    BlackInfo black_info = 12;
+    uint32 uid = 8;
+    string msg = 14;
+    uint32 retcode = 13;
+}

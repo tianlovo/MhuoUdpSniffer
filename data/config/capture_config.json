@@ -1,7 +1,7 @@
 {
-	"bind_device_mac": "50-EB-F6-4A-39-7E",
+	"bind_device_mac": "2C-FD-A1-BE-62-EE",
 	"capture_mode": "NONPROMISCUOUS",
-	"enable_kcp_analyze": false,
+	"enable_kcp_analyze": true,
 	"per_max_length": 1048576,
 	"server_port_list":[
 		23301,
@@ -9,5 +9,5 @@
 	],
 	"timeout":10000,
 	"auto_save_capture": true,
-	"save_capture_interval": 1
+	"save_capture_interval": 5
 }

@@ -1,6 +1,7 @@
 package com.tlovo.util;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
 
 /**
  * 加/解密帮助器
@@ -30,5 +31,23 @@ public final class CryptoHelper {
             byte keyByte = key[i % keyLength];
             data.setByte(i, dataByte ^ keyByte);
         }
+    }
+
+    /**
+     * 通过随机数种子生成xor pad
+     * @param seed 随机数种子
+     * @return xor pad
+     */
+    public static byte[] createXorPad(long seed) {
+        MT19937_64 rand = new MT19937_64();
+        rand.seed(seed);
+
+        ByteBuf xorPad = PooledByteBufAllocator.DEFAULT.buffer(4096);
+
+        for (int i = 0; i < 4096; i+=8) {
+            xorPad.writeLong(rand.generate());
+        }
+
+        return BytesUtil.directBufferToByteArray(xorPad);
     }
 }
