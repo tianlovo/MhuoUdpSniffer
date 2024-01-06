@@ -29,6 +29,8 @@ public class ProtoMessage {
 
     public ProtoMessage(String messageName) {
         this.messageName = messageName;
+        fields = new ArrayList<>();
+        msgFields = new HashMap<>();
     }
 
     public void parseFrom(UnknownFieldSet fieldSet) {

@@ -36,7 +36,6 @@ public class UdpPacketListener implements PacketListener {
             CaptureConfig captureConfig = MhuoUdpSniffer.getCaptureConfig();
             UdpPacket udpPacket = packet.get(UdpPacket.class);
             UdpHeader header = udpPacket.getHeader();
-            Packet payload = udpPacket.getPayload();
             String sender = "";
 
             // 端口判断
@@ -56,23 +55,23 @@ public class UdpPacketListener implements PacketListener {
             }
 
             // 处理数据包
-            handlePacket(payload.getRawData(), sender);
+            handlePacket(udpPacket.getRawData(), sender);
         }
     }
 
-    private void handlePacket(byte[] payload, String sender) {
+    private void handlePacket(byte[] rawData, String sender) {
         if (sender.isBlank()) return;
 
         CaptureConfig captureConfig = MhuoUdpSniffer.getCaptureConfig();
         LoggingConfig loggingConfig = MhuoUdpSniffer.getLoggingConfig();
 
         if (loggingConfig.EnableCapturedHint) {
-            log.info("捕获UDP => " + payload.length + "字节");
+            log.info("捕获UDP => " + rawData.length + "字节");
         }
 
         // 分析KCP数据
         if (captureConfig.EnableKcpAnalyze) {
-            packetParsePool.submit(new KcpAnalyzer(sender, payload));
+            packetParsePool.submit(new KcpAnalyzer(sender, rawData));
         }
     }
 

@@ -1,12 +1,9 @@
 package com.tlovo.analyze;
 
-import com.alibaba.fastjson2.JSON;
-import com.google.protobuf.*;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.tlovo.MhuoUdpSniffer;
 import com.tlovo.analyze.packet.PacketConst;
-import com.tlovo.analyze.packet.ProtoField;
 import com.tlovo.analyze.packet.ProtoMessage;
-import com.tlovo.config.data.CaptureConfig;
 import com.tlovo.config.data.KcpAnalyzeConfig;
 import com.tlovo.config.data.LoggingConfig;
 import com.tlovo.proto.EmptyMessageOuterClass.EmptyMessage;
@@ -16,9 +13,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.FileDescriptor;
 import java.util.Base64;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Kcp数据分析器
@@ -31,16 +27,18 @@ public class KcpAnalyzer implements Runnable {
     private final String sender;
 
     /** Udp负载数据 */
-    private final byte[] udpPayload;
+    private final byte[] udpRawData;
 
     /** KCP分析配置 */
     private final KcpAnalyzeConfig kcpAnalyzeConfig;
     /** 日志配置 */
     private final LoggingConfig loggingConfig;
 
-    public KcpAnalyzer(String sender, byte[] udpPayload) {
+    private int cmdId;
+
+    public KcpAnalyzer(String sender, byte[] udpRawData) {
         this.sender = sender;
-        this.udpPayload = udpPayload;
+        this.udpRawData = udpRawData;
         this.kcpAnalyzeConfig = MhuoUdpSniffer.getKcpAnalyzeConfig();
         this.loggingConfig = MhuoUdpSniffer.getLoggingConfig();
     }
@@ -53,7 +51,9 @@ public class KcpAnalyzer implements Runnable {
             kcpBuf.release();
 
             ProtoMessage msg = parseUnknownProto(proto);
-            // TODO 处理消息
+            if (msg != null) {
+                // TODO 处理消息
+            }
         }
     }
 
@@ -61,14 +61,21 @@ public class KcpAnalyzer implements Runnable {
      * 解密Udp负载
      */
     private ByteBuf decryptUdpPayload() {
-        ByteBuf buffer = PooledByteBufAllocator.DEFAULT.buffer().writeBytes(udpPayload);
+        final int udpHeader = 8, kcpHeader = 28;
+        ByteBuf buffer = PooledByteBufAllocator.DEFAULT.buffer().writeBytes(udpRawData);
+
+        buffer.readBytes(udpHeader); // UDP头部
+        buffer.readBytes(kcpHeader); // KCP头部
 
         // 根据魔数判断使用的xor key
-        long xorMagic = buffer.getUnsignedInt(0);
+        long xorMagic = buffer.getUnsignedInt(buffer.readerIndex());
         xorMagic ^= BytesUtil.int2UnsignedInt(PacketConst.HEADER_CONST);
         String keyBase64 = kcpAnalyzeConfig.XorKeys.get(xorMagic);
         if (keyBase64 == null || keyBase64.isBlank()) {
-            log.warn("无效Xor魔数键 => " + xorMagic);
+            if (loggingConfig.EnableKcpAnalyzeHint) {
+                log.warn("无效Xor魔数键 => " + xorMagic);
+//                log.debug(BytesUtil.byteArrayToHexString(udpRawData, 16));
+            }
             return null;
         }
 
@@ -103,7 +110,7 @@ public class KcpAnalyzer implements Runnable {
         }
 
         // 数据信息
-        int cmdId = packet.readShort(); // 指令值
+        cmdId = packet.readShort(); // 指令值
         int headerLength = packet.readShort(); // kcp头部长度
         int dataLength = packet.readInt(); // protobuf内容长度
 
@@ -119,7 +126,12 @@ public class KcpAnalyzer implements Runnable {
         }
 
         if (loggingConfig.EnableKcpAnalyzeHint) {
-            log.info("[" + sender +"]发送CmdId => " + cmdId);
+            Map<Integer, String> cmdIds = MhuoUdpSniffer.getCmdIds();
+            if (cmdIds != null && cmdIds.containsKey(cmdId)) {
+                log.info("[" + sender +"]发送 => " + cmdIds.get(cmdId));
+            } else {
+                log.info("[" + sender +"]发送 CmdId => " + cmdId);
+            }
         }
 
         return proto;
@@ -134,7 +146,15 @@ public class KcpAnalyzer implements Runnable {
         try {
             EmptyMessage msg = EmptyMessage.parseFrom(proto);
 
-            ProtoMessage message = new ProtoMessage();
+            ProtoMessage message;
+
+            Map<Integer, String> cmdIds = MhuoUdpSniffer.getCmdIds();
+            if (cmdIds != null && cmdIds.containsKey(cmdId)) {
+                message = new ProtoMessage(cmdIds.get(cmdId));
+            } else {
+                message = new ProtoMessage(String.valueOf(cmdId));
+            }
+
             message.parseFrom(msg.getUnknownFields());
 
             return message;
