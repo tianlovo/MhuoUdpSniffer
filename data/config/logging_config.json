@@ -1,4 +1,4 @@
 {
-	"enable_captured_hint": false,
+	"enable_captured_hint": true,
 	"enable_kcp_analyze_hint": true
 }

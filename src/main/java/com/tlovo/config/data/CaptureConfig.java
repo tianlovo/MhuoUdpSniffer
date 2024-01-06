@@ -69,7 +69,7 @@ public class CaptureConfig extends Config {
      * 保存捕获数据间隔（秒）
      */
     @JSONField(name = "save_capture_interval")
-    public int SaveCaptureInterval = 1;
+    public int SaveCaptureInterval = 5;
 
     @Getter
     @Setter(AccessLevel.PROTECTED)

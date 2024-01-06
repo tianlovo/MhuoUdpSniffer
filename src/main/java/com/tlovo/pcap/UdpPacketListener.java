@@ -5,6 +5,7 @@ import com.tlovo.analyze.KcpAnalyzer;
 import com.tlovo.config.data.CaptureConfig;
 import com.tlovo.config.data.LoggingConfig;
 import com.tlovo.pcap.data.CaptureData;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.pcap4j.core.NotOpenException;
 import org.pcap4j.core.PacketListener;
@@ -25,20 +26,14 @@ public class UdpPacketListener implements PacketListener {
     /** 解析数据包线程池 */
     private final ExecutorService packetParsePool;
     private final CaptureSaver captureSaver;
-    private PcapDumper dumper;
+
+    /** .pcap文件保存器 */
+    @Setter private PcapDumper dumper;
 
     public UdpPacketListener(ExecutorService packetParsePool) {
         this.packetParsePool = packetParsePool;
         this.captureSaver = new CaptureSaver(MhuoUdpSniffer.getCaptureConfig().SaveCaptureInterval);
         captureSaver.start();
-    }
-
-    /**
-     * 设置.pcap文件保存器
-     * @param dumper .pcap文件保存器
-     */
-    public void setDumper(PcapDumper dumper) {
-        this.dumper = dumper;
     }
 
     /**
@@ -99,8 +94,8 @@ public class UdpPacketListener implements PacketListener {
 
                 UdpHeader header = packet.getHeader();
                 captureSaver.add2Save(new CaptureData(
-                        header.getSrcPort().value(),
-                        header.getDstPort().value(),
+                        header.getSrcPort().valueAsInt(),
+                        header.getDstPort().valueAsInt(),
                         System.currentTimeMillis(),
                         Base64.getEncoder().encodeToString(rawData)
                 ));

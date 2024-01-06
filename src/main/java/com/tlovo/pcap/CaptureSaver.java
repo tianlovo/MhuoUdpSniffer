@@ -24,7 +24,12 @@ public class CaptureSaver {
     private final int interval;
 
     /** 等待保存列表 */
-    private final ConcurrentHashMap<Long, CaptureData> waitList;
+    private final ConcurrentHashMap<String, CaptureData> waitList;
+
+    /** 保存的json文件路径 */
+    private final String filePath;
+
+
     private long index;
     private FileWriter fileWriter;
     private Timer timer;
@@ -35,6 +40,7 @@ public class CaptureSaver {
     public CaptureSaver(int interval) {
         this.interval = interval;
         this.waitList = new ConcurrentHashMap<>();
+        this.filePath = PathUtil.CapturePath + "/" + filePrefix + System.currentTimeMillis() + ".json";
         this.index = 1;
     }
 
@@ -77,9 +83,8 @@ public class CaptureSaver {
      * @return 是否检查成功
      */
     private boolean fileCheck() {
-        String path = PathUtil.CapturePath + "/" + filePrefix + System.currentTimeMillis() + ".json";
         try {
-            File file = new File(path);
+            File file = new File(filePath);
             if (!file.exists()) {
                 if (!file.createNewFile()) {
                     throw new IOException("无法创建捕获文件");
@@ -101,15 +106,25 @@ public class CaptureSaver {
      * @param data 要添加的捕获数据
      */
     public void add2Save(CaptureData data) {
-        waitList.put(index++, data);
+        waitList.put(String.valueOf(index++), data);
     }
 
     /**
      * 将等待保存列表里的所有数据保存到捕获文件中
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void save() {
         String json = JSON.toJSONString(waitList, Feature.PrettyFormat);
+
         try {
+            File file = new File(filePath);
+            if (file.exists()) {
+                fileWriter.close();
+                file.delete();
+                file.createNewFile();
+                fileWriter = new FileWriter(file, false);
+            }
+
             fileWriter.write(json);
         } catch (IOException e) {
             log.warn("保存捕获数据发生异常", e);

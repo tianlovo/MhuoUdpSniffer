@@ -15,13 +15,13 @@ public class CaptureData {
      * 数据包源端口
      */
     @JSONField(name = "source_port")
-    public short SrcPort;
+    public int SrcPort;
 
     /**
      * 数据包目标端口
      */
     @JSONField(name = "dst_port")
-    public short DstPort;
+    public int DstPort;
 
     /**
      * 接收该数据包时的时间戳(ms)
