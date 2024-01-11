@@ -1,7 +1,6 @@
 package com.tlovo.pcap;
 
 import com.tlovo.MhuoUdpSniffer;
-import com.tlovo.analyze.KcpAnalyzer;
 import com.tlovo.config.data.CaptureConfig;
 import com.tlovo.config.data.LoggingConfig;
 import com.tlovo.pcap.data.CaptureData;
@@ -100,11 +99,6 @@ public class UdpPacketListener implements PacketListener {
                         Base64.getEncoder().encodeToString(rawData)
                 ));
             });
-        }
-
-        // 分析KCP数据
-        if (captureConfig.EnableKcpAnalyze) {
-            packetParsePool.submit(new KcpAnalyzer(sender, rawData));
         }
     }
 

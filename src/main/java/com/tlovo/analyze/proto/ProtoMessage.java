@@ -1,4 +1,4 @@
-package com.tlovo.analyze.packet;
+package com.tlovo.analyze.proto;
 
 import com.google.protobuf.UnknownFieldSet;
 

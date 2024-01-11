@@ -14,6 +14,7 @@ public class MT19937_64 {
      * 使用随机种子创建随机数生成器
      * @param seed MT19937_64随机数生成器
      */
+    @SuppressWarnings("unused")
     public MT19937_64(long seed) {
         mt = new long[NN];
         mti = NN + 1;

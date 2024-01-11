@@ -1,7 +1,7 @@
 {
 	"bind_device_mac": "2C-FD-A1-BE-62-EE",
 	"capture_mode": "NONPROMISCUOUS",
-	"enable_kcp_analyze": true,
+	"enable_kcp_analyze": false,
 	"per_max_length": 1048576,
 	"server_port_list":[
 		23301,

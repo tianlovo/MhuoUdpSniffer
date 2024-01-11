@@ -68,4 +68,31 @@ public final class BytesUtil {
         buffer.readBytes(bytes);
         return bytes;
     }
+
+    /**
+     * 将两个byte数组连接在一起，并返回新的数组。
+     *
+     * @param arrayA 第一个byte数组
+     * @param arrayB 第二个byte数组
+     * @return 连接后的新byte数组
+     * @throws IllegalArgumentException 如果输入的数组任一为空
+     */
+    public static byte[] concatenateArrays(byte[] arrayA, byte[] arrayB) {
+        if (arrayA == null || arrayB == null) {
+            throw new IllegalArgumentException("输入的数组不能为null");
+        }
+
+        int lenA = arrayA.length;
+        int lenB = arrayB.length;
+        byte[] result = new byte[lenA + lenB];
+
+        // 将数组A的内容复制到结果数组
+        System.arraycopy(arrayA, 0, result, 0, lenA);
+
+        // 将数组B的内容复制到结果数组的后面
+        System.arraycopy(arrayB, 0, result, lenA, lenB);
+
+        return result;
+    }
+
 }
